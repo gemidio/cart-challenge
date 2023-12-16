@@ -66,6 +66,22 @@ func TestCartErrNegativeSubtotal(t *testing.T) {
 	})
 }
 
+func TestCartErrNegativeTotal(t *testing.T) {
+	cart := newMockCart(
+		[]Item{
+			{uuid.New(), uuid.New(), *money.NewFromFloat(3, money.BRL), 1},
+		},
+		Discount{
+			"some-discount",
+			*money.NewFromFloat(5, money.BRL),
+		},
+	)
+
+	_, err := cart.Total()
+
+	assert.Error(t, err, ErrNegativeTotal)
+}
+
 func newMockCart(items []Item, discount Discount) Cart {
 	return Cart{
 		id:       uuid.New(),

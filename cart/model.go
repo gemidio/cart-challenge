@@ -10,6 +10,9 @@ import (
 var (
 	// ErrInvalidSubtotal happens when cart's subtotal is negataive
 	ErrNegativeSubtotal = errors.New("subtotal is negative")
+
+	// ErrInvalidTotal happens when cart's total is negataive
+	ErrNegativeTotal = errors.New("total is negative")
 )
 
 type Discount struct {
@@ -53,6 +56,10 @@ func (c *Cart) Total() (*money.Money, error) {
 	}
 
 	total, _ := subtotal.Subtract(&c.discount.total)
+
+	if total.IsNegative() {
+		return &money.Money{}, ErrNegativeTotal
+	}
 
 	return total, nil
 }
