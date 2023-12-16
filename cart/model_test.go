@@ -3,7 +3,6 @@ package cart
 import (
 	"testing"
 
-	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,18 +10,18 @@ import (
 func TestCart(t *testing.T) {
 	cart := newMockCart(
 		[]Item{
-			{uuid.New(), uuid.New(), *money.NewFromFloat(5, money.BRL), 1},
-			{uuid.New(), uuid.New(), *money.NewFromFloat(5, money.BRL), 1},
+			{uuid.New(), uuid.New(), *newMoney(5), 1},
+			{uuid.New(), uuid.New(), *newMoney(5), 1},
 		},
 		Discount{
 			"some-discount",
-			*money.NewFromFloat(5, money.BRL),
+			*newMoney(5),
 		},
 	)
 
 	t.Run("get subtotal", func(t *testing.T) {
 		subtotal, err := cart.Subtotal()
-		expect := money.NewFromFloat(10, money.BRL)
+		expect := newMoney(10)
 
 		isEquals, _ := subtotal.Equals(expect)
 
@@ -32,7 +31,7 @@ func TestCart(t *testing.T) {
 
 	t.Run("get total", func(t *testing.T) {
 		total, err := cart.Total()
-		expect := money.NewFromFloat(5, money.BRL)
+		expect := newMoney(5)
 
 		isEquals, _ := total.Equals(expect)
 
@@ -45,11 +44,11 @@ func TestCartErrNegativeSubtotal(t *testing.T) {
 
 	cart := newMockCart(
 		[]Item{
-			{uuid.New(), uuid.New(), *money.NewFromFloat(-1, money.BRL), 1},
+			{uuid.New(), uuid.New(), *newMoney(-1), 1},
 		},
 		Discount{
 			"some-discount",
-			*money.NewFromFloat(5, money.BRL),
+			*newMoney(5),
 		},
 	)
 
@@ -69,11 +68,11 @@ func TestCartErrNegativeSubtotal(t *testing.T) {
 func TestCartErrNegativeTotal(t *testing.T) {
 	cart := newMockCart(
 		[]Item{
-			{uuid.New(), uuid.New(), *money.NewFromFloat(3, money.BRL), 1},
+			{uuid.New(), uuid.New(), *newMoney(3), 1},
 		},
 		Discount{
 			"some-discount",
-			*money.NewFromFloat(5, money.BRL),
+			*newMoney(5),
 		},
 	)
 
