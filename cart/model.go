@@ -1,8 +1,15 @@
 package cart
 
 import (
+	"errors"
+
 	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
+)
+
+var (
+	// ErrInvalidSubtotal happens when cart's subtotal is negataive
+	ErrNegativeSubtotal = errors.New("subtotal is negative")
 )
 
 type Discount struct {
@@ -24,18 +31,28 @@ type Cart struct {
 	itens    []Item
 }
 
-func (c *Cart) Subtotal() *money.Money {
+func (c *Cart) Subtotal() (*money.Money, error) {
 	subtotal := money.NewFromFloat(0, money.BRL)
 
 	for _, item := range c.itens {
 		subtotal, _ = subtotal.Add(item.price.Multiply(int64(item.quantity)))
 	}
 
-	return subtotal
+	if subtotal.IsNegative() {
+		return &money.Money{}, ErrNegativeSubtotal
+	}
+
+	return subtotal, nil
 }
 
-func (c *Cart) Total() *money.Money {
-	total, _ := c.Subtotal().Subtract(&c.discount.total)
+func (c *Cart) Total() (*money.Money, error) {
+	subtotal, err := c.Subtotal()
 
-	return total
+	if err != nil {
+		return &money.Money{}, err
+	}
+
+	total, _ := subtotal.Subtract(&c.discount.total)
+
+	return total, nil
 }
