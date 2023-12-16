@@ -35,7 +35,7 @@ type Cart struct {
 }
 
 func (c *Cart) Subtotal() (*money.Money, error) {
-	subtotal := money.NewFromFloat(0, money.BRL)
+	subtotal := newMoney(0)
 
 	for _, item := range c.itens {
 		subtotal, _ = subtotal.Add(item.price.Multiply(int64(item.quantity)))
