@@ -10,15 +10,15 @@ import (
 
 func TestCart(t *testing.T) {
 	cart := Cart{
-		id:      uuid.New(),
-		user_id: uuid.New(),
+		id:     uuid.New(),
+		userId: uuid.New(),
 		discount: Discount{
 			"some-discount",
 			*money.NewFromFloat(5, money.BRL),
 		},
 		itens: []Item{
-			{uuid.New(), *money.NewFromFloat(5, money.BRL), 1},
-			{uuid.New(), *money.NewFromFloat(5, money.BRL), 1},
+			{uuid.New(), uuid.New(), *money.NewFromFloat(5, money.BRL), 1},
+			{uuid.New(), uuid.New(), *money.NewFromFloat(5, money.BRL), 1},
 		},
 	}
 
