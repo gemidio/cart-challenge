@@ -13,11 +13,31 @@ var (
 
 	// ErrInvalidTotal happens when cart's total is negataive
 	ErrNegativeTotal = errors.New("total is negative")
+
+	// ErrInvalidDiscount happens when total is less than zero
+	ErrInvalidDiscount = errors.New("discount is invalid")
 )
+
+func NewDiscount(rule string, value float64) (Discount, error) {
+	valueMoney := *newMoney(value)
+
+	if valueMoney.IsNegative() {
+		return Discount{
+			rule,
+			*newMoney(0),
+		}, ErrInvalidDiscount
+	}
+
+	return Discount{rule, valueMoney}, nil
+}
 
 type Discount struct {
 	rule  string
-	total money.Money
+	value money.Money
+}
+
+func (d Discount) IsZero() bool {
+	return d.value.IsZero()
 }
 
 type Item struct {
@@ -55,7 +75,7 @@ func (c *Cart) Total() (*money.Money, error) {
 		return &money.Money{}, err
 	}
 
-	total, _ := subtotal.Subtract(&c.discount.total)
+	total, _ := subtotal.Subtract(&c.discount.value)
 
 	if total.IsNegative() {
 		return &money.Money{}, ErrNegativeTotal
