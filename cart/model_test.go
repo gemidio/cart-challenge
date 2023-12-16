@@ -3,6 +3,7 @@ package cart
 import (
 	"testing"
 
+	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -79,6 +80,25 @@ func TestCartErrNegativeTotal(t *testing.T) {
 	_, err := cart.Total()
 
 	assert.Error(t, err, ErrNegativeTotal)
+}
+
+func TestNewDiscount(t *testing.T) {
+
+	t.Run("get valid discount", func(t *testing.T) {
+		discount, _ := NewDiscount("some-discount", 10)
+		expectTotal := money.NewFromFloat(10, money.BRL)
+
+		isEquals, _ := discount.total.Equals(expectTotal)
+
+		assert.Equal(t, "some-discount", discount.rule)
+		assert.True(t, isEquals)
+	})
+
+	t.Run("get invalid discount error", func(t *testing.T) {
+		_, err := NewDiscount("some-discount", -10)
+
+		assert.Error(t, err, ErrInvalidDiscount)
+	})
 }
 
 func newMockCart(itens []Item, discount Discount) Cart {
