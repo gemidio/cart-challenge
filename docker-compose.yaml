@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+
+  sqlite:
+    image: 'alpine/sqlite'
+    volumes:
+      - ./build/docker/sqlite/database.db:/database.db
+    entrypoint:
+      - /usr/bin/sqlite3
+      - /database.db
