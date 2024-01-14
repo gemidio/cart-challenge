@@ -5,6 +5,8 @@ go 1.21.5
 require (
 	github.com/Rhymond/go-money v1.0.10
 	github.com/google/uuid v1.5.0
+	github.com/joho/godotenv v1.5.1
+	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/stretchr/testify v1.8.4
 )
 
