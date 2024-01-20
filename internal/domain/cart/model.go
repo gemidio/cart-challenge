@@ -2,9 +2,15 @@ package cart
 
 import (
 	"errors"
+	"slices"
+	"time"
 
 	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
+)
+
+const (
+	percentageCoupon = "percentage"
 )
 
 var (
@@ -31,6 +37,12 @@ func NewDiscount(rule string, value float64) (Discount, error) {
 	return Discount{rule, valueMoney}, nil
 }
 
+func NoDiscount(rule string) Discount {
+	discount, _ := NewDiscount(rule, 0)
+
+	return discount
+}
+
 type Discount struct {
 	rule  string
 	value money.Money
@@ -52,6 +64,7 @@ type Cart struct {
 	userId   uuid.UUID
 	discount Discount
 	items    []Item
+	coupon   string
 }
 
 func (c *Cart) Subtotal() (*money.Money, error) {
@@ -82,4 +95,50 @@ func (c *Cart) Total() (*money.Money, error) {
 	}
 
 	return total, nil
+}
+
+func (c *Cart) AddPromotionalCoupon(label string) {
+	// c.promotionalCoupon = label
+}
+
+func NewCoupon(label string, ctype string, minimumAmount float64, value float64, expireAt time.Time) (Coupon, error) {
+
+	if slices.Contains([]string{"percentage", "money"}, ctype) {
+		return Coupon{}, errors.New("coupon type is invalid")
+	}
+
+	return Coupon{label, ctype, minimumAmount, value, expireAt}, nil
+}
+
+type Coupon struct {
+	label         string
+	ctype         string
+	minimumAmount float64
+	value         float64
+	expireAt      time.Time
+}
+
+func (c Coupon) isApplicable(amount *money.Money) bool {
+	return c.minimumAmount <= float64(amount.Amount())
+}
+
+func (c Coupon) isPercentage() bool {
+	return c.ctype == percentageCoupon
+}
+
+func (c Coupon) Percentage() float64 {
+
+	if !c.isPercentage() {
+		return float64(0)
+	}
+
+	return c.value / 100
+}
+
+func (c Coupon) isExpired() bool {
+	return c.expireAt.Before(time.Now())
+}
+
+func (c Coupon) Label() string {
+	return c.label
 }

@@ -2,6 +2,7 @@ package cart
 
 import (
 	"testing"
+	"time"
 
 	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
@@ -105,6 +106,41 @@ func TestNewDiscount(t *testing.T) {
 
 		assert.True(t, discount.IsZero())
 	})
+}
+
+func TestCupon(t *testing.T) {
+
+	coupon := Coupon{
+		"SOME-COUPON",
+		"percentage",
+		float64(0),
+		float64(100),
+		time.Now().AddDate(1, 1, 1),
+	}
+
+	t.Run("check if it is a percentage coupon", func(t *testing.T) {
+		assert.True(t, coupon.isPercentage())
+	})
+
+	t.Run("check if it is avaliable", func(t *testing.T) {
+		assert.False(t, coupon.isExpired())
+	})
+
+	t.Run("check label", func(t *testing.T) {
+		assert.Equal(t, "SOME-COUPON", coupon.Label())
+	})
+}
+
+func TestCheckIfCouponHasExpired(t *testing.T) {
+	coupon := Coupon{
+		"SOME-COUPON",
+		"percentage",
+		float64(0),
+		float64(100),
+		time.Now(),
+	}
+
+	assert.True(t, coupon.isExpired())
 }
 
 func newMockCart(items []Item, discount Discount) Cart {

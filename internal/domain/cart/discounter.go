@@ -36,3 +36,27 @@ func (tt *TakeThreePayTwoDiscounter) calculate(c Cart) Discount {
 
 	return Discount{"take-3-pay-2", *total}
 }
+
+type PromotionCouponDiscounter struct {
+	repository PromotionCouponRepository
+}
+
+func (pc PromotionCouponDiscounter) calculate(c Cart) Discount {
+	subtotal, _ := c.Subtotal()
+	coupon, err := pc.repository.Find(c.coupon)
+
+	if err != nil || coupon.isExpired() || !coupon.isApplicable(subtotal) {
+		return NoDiscount("promotional-coupon")
+	}
+
+	if !coupon.isPercentage() {
+		discount, _ := NewDiscount("promotional-coupon", coupon.value)
+
+		return discount
+	}
+
+	value := subtotal.Multiply(int64(coupon.Percentage()))
+	discount, _ := NewDiscount("promotional-coupon", float64(value.Amount()))
+
+	return discount
+}
