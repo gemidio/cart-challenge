@@ -4,7 +4,7 @@ on:
   push
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +17,20 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+  unit:
+    needs: 
+      - build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
       - name: Test
         run: go test -v ./...
+    
 
   # golangci:
   #   name: lint
