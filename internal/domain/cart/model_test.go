@@ -2,6 +2,7 @@ package cart
 
 import (
 	"testing"
+	"time"
 
 	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
@@ -104,6 +105,106 @@ func TestNewDiscount(t *testing.T) {
 		discount, _ := NewDiscount("some-discount", -1)
 
 		assert.True(t, discount.IsZero())
+	})
+}
+
+func TestItemOffer(t *testing.T) {
+
+	itemId, _ := uuid.Parse("9f1508fe-b65b-42d8-b4ec-88636c36a679")
+
+	itemOffer := ItemOffer{
+		id:             uuid.New(),
+		itemId:         itemId,
+		targetQuantity: 3,
+		chargeQuantity: 2,
+		expireAt:       time.Now().AddDate(1, 0, 0),
+	}
+
+	t.Run("when quantity is less than offer's target quantity, it doesn't apply", func(t *testing.T) {
+
+		item := Item{
+			id:          itemId,
+			cartegoryId: uuid.New(),
+			price:       *newMoney(10),
+			quantity:    2,
+		}
+
+		actual := itemOffer.isApplicable(item)
+
+		assert.False(t, actual)
+	})
+
+	t.Run("when quantity is equal to offer's target quantity, it doesn't apply", func(t *testing.T) {
+
+		item := Item{
+			id:          itemId,
+			cartegoryId: uuid.New(),
+			price:       *newMoney(10),
+			quantity:    3,
+		}
+
+		actual := itemOffer.isApplicable(item)
+
+		assert.True(t, actual)
+	})
+
+	t.Run("when quantity is greater than offer's target quantity, it doesn't apply", func(t *testing.T) {
+
+		item := Item{
+			id:          itemId,
+			cartegoryId: uuid.New(),
+			price:       *newMoney(10),
+			quantity:    4,
+		}
+
+		actual := itemOffer.isApplicable(item)
+
+		assert.True(t, actual)
+	})
+
+	t.Run("when item ID is different from offer's item ID, it doesn't apply", func(t *testing.T) {
+
+		item := Item{
+			id:          uuid.New(),
+			cartegoryId: uuid.New(),
+			price:       *newMoney(10),
+			quantity:    3,
+		}
+
+		actual := itemOffer.isApplicable(item)
+
+		assert.False(t, actual)
+	})
+}
+
+func TestItemOfferExpiration(t *testing.T) {
+	t.Run("check if item offer is expired", func(t *testing.T) {
+		itemOffer := ItemOffer{
+			id:             uuid.New(),
+			itemId:         uuid.New(),
+			targetQuantity: 3,
+			chargeQuantity: 2,
+			expireAt:       time.Now(),
+		}
+
+		actual := itemOffer.isExpired()
+
+		assert.True(t, actual)
+	})
+
+	t.Run("check if item offer is expired", func(t *testing.T) {
+
+		itemOffer := ItemOffer{
+			id:             uuid.New(),
+			itemId:         uuid.New(),
+			targetQuantity: 3,
+			chargeQuantity: 2,
+			expireAt:       time.Now().AddDate(1, 0, 0),
+		}
+
+		actual := itemOffer.isExpired()
+
+		assert.False(t, actual)
 	})
 }
 

@@ -2,6 +2,7 @@ package cart
 
 import (
 	"errors"
+	"time"
 
 	"github.com/Rhymond/go-money"
 	"github.com/google/uuid"
@@ -82,4 +83,27 @@ func (c *Cart) Total() (*money.Money, error) {
 	}
 
 	return total, nil
+}
+
+type ItemOffer struct {
+	id             uuid.UUID
+	itemId         uuid.UUID
+	targetQuantity int
+	chargeQuantity int
+	expireAt       time.Time
+}
+
+func (io ItemOffer) isApplicable(item Item) bool {
+	return item.id == io.itemId && item.quantity >= int(io.targetQuantity)
+}
+
+func (io ItemOffer) isExpired() bool {
+	return time.Now().After(io.expireAt)
+}
+
+func (io ItemOffer) discountApplyTo(item Item) int {
+
+	rest := io.targetQuantity - io.chargeQuantity
+
+	return (item.quantity / io.targetQuantity) * rest
 }
