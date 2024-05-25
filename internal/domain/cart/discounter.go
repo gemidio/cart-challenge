@@ -4,35 +4,35 @@ type Discounter interface {
 	calculate(c Cart) Discount
 }
 
-type TakeThreePayTwoDiscounter struct {
-	repository ProductOfferRepository
+type TakeMorePayLess struct {
+	repository ItemOfferRepository
 }
 
-func (tt *TakeThreePayTwoDiscounter) calculate(c Cart) Discount {
+func (tt *TakeMorePayLess) calculate(c Cart) Discount {
 	_, err := c.Subtotal()
 
 	if err != nil {
-		discount, _ := NewDiscount("take-3-pay-2", 0)
+		discount, _ := NewDiscount("take-more-pay-less", 0)
 
 		return discount
 	}
 
 	total := newMoney(0)
-
 	for _, item := range c.items {
+		itemOffer, err := tt.repository.FindByItemId(item.id)
 
-		if !tt.repository.IsOffer(item.id) {
+		if err != nil || itemOffer.isExpired() {
 			continue
 		}
 
-		if item.quantity%3 != 0 {
+		if !itemOffer.isApplicable(item) {
 			continue
 		}
 
-		multiplier := int64(item.quantity / 3)
-		price := item.price.Multiply(multiplier)
+		mul := itemOffer.discountApplyTo(item)
+		price := item.price.Multiply(int64(mul))
 		total, _ = total.Add(price)
 	}
 
-	return Discount{"take-3-pay-2", *total}
+	return Discount{"take-more-pay-less", *total}
 }
